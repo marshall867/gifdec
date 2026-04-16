@@ -1,17 +1,7 @@
 #include "gifdec.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "libc.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#ifdef _WIN32
-#include <io.h>
-#else
-#include <unistd.h>
-#endif
 
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
@@ -51,19 +41,16 @@ gd_open_gif(const char *fname)
 
     fd = open(fname, O_RDONLY);
     if (fd == -1) return NULL;
-#ifdef _WIN32
-    setmode(fd, O_BINARY);
-#endif
     /* Header */
     read(fd, sigver, 3);
     if (memcmp(sigver, "GIF", 3) != 0) {
-        fprintf(stderr, "invalid signature\n");
+        printf("invalid signature\n");
         goto fail;
     }
     /* Version */
     read(fd, sigver, 3);
     if (memcmp(sigver, "89a", 3) != 0) {
-        fprintf(stderr, "invalid version\n");
+        printf("invalid version\n");
         goto fail;
     }
     /* Width x Height */
@@ -73,7 +60,7 @@ gd_open_gif(const char *fname)
     read(fd, &fdsz, 1);
     /* Presence of GCT */
     if (!(fdsz & 0x80)) {
-        fprintf(stderr, "no global color table\n");
+        printf("no global color table\n");
         goto fail;
     }
     /* Color Space's Depth */
@@ -233,7 +220,7 @@ read_ext(gd_GIF *gif)
         read_application_ext(gif);
         break;
     default:
-        fprintf(stderr, "unknown extension: %02X\n", label);
+        printf("unknown extension\n");
     }
 }
 
